@@ -10,11 +10,12 @@ typedef enum {
     DEBUG_LEVEL_WARN,       //提示潜在问题（如资源不足、非致命异常），不影响当前操作。
     DEBUG_LEVEL_ERROR,      //记录已发生错误（如功能部分失效），程序仍可继续运行。
     DEBUG_LEVEL_CRITICAL,   //严重错误（如系统崩溃、数据丢失），需立即处理。
+    DEBUG_LEVEL_ALL
 } debug_level_t;
 
 // 全局调试级别设置
 #ifndef CURRENT_DEBUG_LEVEL
-#define CURRENT_DEBUG_LEVEL DEBUG_LEVEL_INFO
+#define CURRENT_DEBUG_LEVEL DEBUG_LEVEL_ALL
 #endif
 
 #define ENABLE_DEBUG 1  //1:on; 0:off
@@ -81,7 +82,12 @@ typedef enum {
     }
 2.在编译时设置调试级别（在编译器选项中）
     -D CURRENT_DEBUG_LEVEL=DEBUG_LEVEL_INFO
-*/
+3.要使能中断输出，在main里
+    #if ENABLE_DEBUG
+        debug_thread.start(callback(&debug_queue, &EventQueue::dispatch_forever)); 
+    #endif
+
+    */
 
 
 #endif // DEBUG_UTILS_H
