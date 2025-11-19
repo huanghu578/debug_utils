@@ -1,8 +1,5 @@
 #ifndef DEBUG_UTILS_H
 #define DEBUG_UTILS_H
-#include "mbed.h"
-extern EventQueue debug_queue;//
-extern Thread debug_thread;
 typedef enum {
     DEBUG_LEVEL_NONE,
     DEBUG_LEVEL_DEBUG,      //用于追踪代码执行流程、变量状态等
@@ -51,16 +48,8 @@ typedef enum {
             if (CURRENT_DEBUG_LEVEL >= DEBUG_LEVEL_CRITICAL) \
                 printf("[CRITICAL][%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__); \
         } while(0)
-
     // 简化的调试宏（不带级别）
     #define DEBUG_PRINT(fmt, ...) DEBUG_INFO(fmt, ##__VA_ARGS__)
-
-    // 中断安全的调试输出（使用Mbed的事件队列）
-    #define DEBUG_PRINT_ISR(fmt, ...) \
-        do { \
-            debug_queue.call(printf, "[ISR]%s-%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__); \
-        } while(0)
-
 #else    
     #define DEBUG_DEBUG(fmt, ...) 
     #define DEBUG_INFO(fmt, ...) 
@@ -68,26 +57,12 @@ typedef enum {
     #define DEBUG_ERROR(fmt, ...) 
     #define DEBUG_CRITICAL(fmt, ...)     
     #define DEBUG_PRINT(fmt, ...)     
-    #define DEBUG_PRINT_ISR(fmt, ...) 
 #endif
-
-
 /*
-用法，以设置DEBUG_LEVEL_INFO为例
-1.mbed_app.json
-    {
-        "macros": [
-            "CURRENT_DEBUG_LEVEL=DEBUG_LEVEL_INFO"
-        ]
-    }
-2.在编译时设置调试级别（在编译器选项中）
-    -D CURRENT_DEBUG_LEVEL=DEBUG_LEVEL_INFO
-3.要使能中断输出，在main里
-    #if ENABLE_DEBUG
-        debug_thread.start(callback(&debug_queue, &EventQueue::dispatch_forever)); 
-    #endif
-
+此文件只能用在普通线程里debug输出，不能用在中断里。
+1.可选定义调试级别，有效值见debug_level_t枚举，默认DEBUG_LEVEL_ALL。(mbed里建议用内置的debug API。)
+在编译时设置调试级别（在编译器选项中）
+    -D CURRENT_DEBUG_LEVEL=XXX
+或者直接定义 #define CURRENT_DEBUG_LEVEL XXX
     */
-
-
 #endif // DEBUG_UTILS_H
